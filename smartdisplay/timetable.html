@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Weekly Timetable Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent: #1769aa;
+            --muted: #f5f7fa;
+            --cell: #ffffff;
+            --border: #e1e6ee;
+            --faculty: #555;
+            --subject: #0b3d91;
+            --control: #0b74e0;
+            --danger: #d9534f;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--muted);
+            color: #222;
+        }
+        
+        .wrap {
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(2, 6, 23, 0.08);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--control);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0a63c2;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c9302c;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .table-wrap {
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 900px;
+        }
+        
+        th, td {
+            padding: 12px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--cell);
+            vertical-align: top;
+        }
+        
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 2;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        th.time {
+            width: 160px;
+            background: linear-gradient(180deg, #fbfdff, #f6fbff);
+            text-align: left;
+        }
+        
+        td:first-child, th.time {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        td.empty {
+            color: #9aa3b2;
+            text-align: center;
+        }
+        
+        .class-card {
+            padding: 10px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #fff, #f8fbff);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+            border: 1px solid #e9f0fb;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .class-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subject {
+            color: var(--subject);
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .faculty {
+            font-size: 13px;
+            color: var(--faculty);
+            margin-bottom: 2px;
+        }
+        
+        .period {
+            font-size: 12px;
+            color: #666;
+            background: #f0f5ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        .card-controls {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        
+        .class-card:hover .card-controls {
+            opacity: 1;
+        }
+        
+        .ctrl-btn {
+            background: transparent;
+            border: 0;
+            padding: 4px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--control);
+            font-size: 14px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ctrl-btn:hover {
+            background: rgba(11, 116, 224, 0.1);
+        }
+        
+        .ctrl-btn.delete {
+            color: var(--danger);
+        }
+        
+        .ctrl-btn.delete:hover {
+            background: rgba(217, 83, 79, 0.1);
+        }
+        
+        /* Edit buttons for column/row bulk edits */
+        .col-edit-btn, .row-edit-btn {
+            background: transparent;
+            border: 0;
+            color: var(--control);
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        
+        .col-edit-btn:hover, .row-edit-btn:hover {
+            background: rgba(11, 116, 224, 0.1);
+        }
+        
+        .day-header, .time-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .day-title, .time-title {
+            flex-grow: 1;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal {
+            width: 100%;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 12px 40px rgba(2, 6, 23, 0.35);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title {
+            margin: 0;
+            font-size: 18px;
+            color: var(--accent);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .close-btn:hover {
+            background: #f1f3f5;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--control);
+            box-shadow: 0 0 0 3px rgba(11, 116, 224, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .col {
+            flex: 1;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Bulk edit modal */
+        .bulk-edit-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        
+        .bulk-edit-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+        }
+        
+        .bulk-edit-item-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Status messages */
+        .status-message {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            th.time {
+                width: 120px;
+                font-size: 13px;
+            }
+            
+            .subject {
+                font-size: 13px;
+            }
+            
+            .faculty {
+                font-size: 12px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> Weekly Timetable Editor</h1>
+            <div class="header-controls">
+                <!-- Back navigation button -->
+                <button class="btn btn-primary" id="backBtn" title="Go back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="btn btn-primary" id="addNewBtn">
+                    <i class="fas fa-plus"></i> Add New Entry
+                </button>
+                <button class="btn btn-success" id="exportBtn">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <button class="btn btn-warning" id="clearAllBtn">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="table-wrap">
+            <table id="timetable" aria-label="weekly timetable">
+                <!-- Table is generated by JavaScript -->
+            </table>
+        </div>
+    </div>
+    
+    <!-- Edit Single Entry Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="editTitle">Edit Timetable Entry</h3>
+                <button class="close-btn" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="col">
+                        <label for="modalDay" class="form-label">Day</label>
+                        <select id="modalDay" class="form-control"></select>
+                    </div>
+                    <div class="col">
+                        <label for="modalSlot" class="form-label">Time Slot</label>
+                        <select id="modalSlot" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modalPeriod" class="form-label">Period Number</label>
+                    <input type="number" id="modalPeriod" class="form-control" min="1" max="10" placeholder="e.g., 1">
+                </div>
+                <div class="form-group">
+                    <label for="modalSubject" class="form-label">Subject Name</label>
+                    <input type="text" id="modalSubject" class="form-control" placeholder="e.g., Mathematics">
+                </div>
+                <div class="form-group">
+                    <label for="modalFaculty" class="form-label">Faculty Name</label>
+                    <input type="text" id="modalFaculty" class="form-control" placeholder="e.g., Dr. S. Kumar">
+                </div>
+                <div class="form-group">
+                    <label for="modalRoom" class="form-label">Room/Lab</label>
+                    <input type="text" id="modalRoom" class="form-control" placeholder="e.g., Room 101">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="modalDelete">Delete Entry</button>
+                <button class="btn" id="modalCancel">Cancel</button>
+                <button class="btn btn-success" id="modalSave">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Day (Column) Modal -->
+    <div class="modal-overlay" id="dayModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="dayTitle">Edit Day: <span id="dayNameDisplay"></span></h3>
+                <button class="close-btn" id="closeDayModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                    Edit all entries for <strong id="currentDayName"></strong>. Changes will apply to all time slots for this day.
+                </p>
+                <div class="bulk-edit-container" id="dayEditorContainer">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="dayCancel">Cancel</button>
+                <button class="btn btn-success" id="daySave">Save All Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Row (Time Slot) Modal -->
+    <div class="modal-overlay" id="rowModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rowTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="rowTitle">Edit Time Slot: <span id="rowSlotDisplay"></span></h3>
+                <button class="close-btn" id="closeRowModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="rowSlotLabel" class="form-label">Slot Time Label</label>
+                    <input type="text" id="rowSlotLabel" class="form-control" placeholder="e.g., 09:00-10:00">
+                </div>
+                <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                    Edit all entries for time slot <strong id="currentSlotName"></strong>. Changes will apply to all days for this time slot.
+                </p>
+                <div class="bulk-edit-container" id="rowEditorContainer">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="rowCancel">Cancel</button>
+                <button class="btn btn-success" id="rowSave">Save All Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Clear All Confirmation Modal -->
+    <div class="modal-overlay" id="clearModal">
+        <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h3 class="modal-title">Clear All Entries</h3>
+                <button class="close-btn" id="closeClearModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: var(--warning); margin-bottom: 15px;"></i>
+                    <h3 style="margin-bottom: 10px;">Are you sure?</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        This will delete ALL timetable entries. This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="clearCancel">Cancel</button>
+                <button class="btn btn-danger" id="clearConfirm">Yes, Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Days and time slots (9am-5pm)
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const slots = [
+            '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00',
+            '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00'
+        ];
+
+        // Initialize timetable data structure
+        let timetableData = {};
+        
+        // Load data from localStorage or initialize with sample data
+        function loadData() {
+            const saved = localStorage.getItem('timetableData');
+            if (saved) {
+                timetableData = JSON.parse(saved);
+            } else {
+                // Initialize with sample data
+                timetableData = {
+                    Monday: {
+                        '09:00-10:00': { period: 1, subject: 'Mathematics', faculty: 'Dr. S. Kumar', room: 'Room 101' },
+                        '10:00-11:00': { period: 2, subject: 'Physics', faculty: 'Prof. I. Sharma', room: 'Lab 201' },
+                        '11:00-12:00': { period: 3, subject: 'Chemistry', faculty: 'Dr. R. Mehta', room: 'Room 102' },
+                        '12:00-13:00': { period: 0, subject: 'Lunch Break', faculty: '', room: '' },
+                        '13:00-14:00': { period: 4, subject: 'Computer Science', faculty: 'Ms. N. Das', room: 'Lab 202' },
+                        '14:00-15:00': { period: 5, subject: 'English', faculty: 'Mr. A. Jain', room: 'Room 103' },
+                        '15:00-16:00': { period: 6, subject: 'Lab Session', faculty: 'Lab Incharge', room: 'Lab 203' },
+                        '16:00-17:00': { period: 7, subject: 'Tutorial', faculty: 'Dr. S. Kumar', room: 'Room 101' }
+                    },
+                    Tuesday: {
+                        '09:00-10:00': { period: 1, subject: 'Data Structures', faculty: 'Prof. P. Rao', room: 'Room 104' },
+                        '10:00-11:00': { period: 2, subject: 'Database Systems', faculty: 'Dr. L. Gupta', room: 'Room 105' },
+                        '11:00-12:00': { period: 3, subject: 'Software Engineering', faculty: 'Ms. M. Iyer', room: 'Room 106' },
+                        '12:00-13:00': { period: 0, subject: 'Lunch Break', faculty: '', room: '' },
+                        '13:00-14:00': { period: 4, subject: 'Networks', faculty: 'Dr. K. Verma', room: 'Lab 204' },
+                        '14:00-15:00': { period: 5, subject: 'Operating Systems', faculty: 'Mr. R. Patel', room: 'Room 107' },
+                        '15:00-16:00': { period: 6, subject: 'Project Work', faculty: 'Prof. P. Rao', room: 'Lab 205' },
+                        '16:00-17:00': { period: 7, subject: 'Seminar', faculty: 'Ms. M. Iyer', room: 'Auditorium' }
+                    }
+                };
+                
+                // Initialize empty data for remaining days
+                days.forEach(day => {
+                    if (!timetableData[day]) {
+                        timetableData[day] = {};
+                    }
+                    slots.forEach(slot => {
+                        if (!timetableData[day][slot]) {
+                            timetableData[day][slot] = { period: 0, subject: '', faculty: '', room: '' };
+                        }
+                    });
+                });
+                
+                saveData();
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('timetableData', JSON.stringify(timetableData));
+        }
+        
+        // Build the timetable table
+        function buildTable() {
+            const table = document.getElementById('timetable');
+            table.innerHTML = '';
+            
+            // Create header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // Time column header
+            const timeHeader = document.createElement('th');
+            timeHeader.className = 'time';
+            const timeHeaderDiv = document.createElement('div');
+            timeHeaderDiv.className = 'time-header';
+            timeHeaderDiv.innerHTML = `
+                <div class="time-title">Time Slot</div>
+                <button class="row-edit-btn" title="Add new time slot" onclick="addNewTimeSlot()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            `;
+            timeHeader.appendChild(timeHeaderDiv);
+            headerRow.appendChild(timeHeader);
+            
+            // Day headers with edit buttons
+            days.forEach(day => {
+                const dayHeader = document.createElement('th');
+                const dayHeaderDiv = document.createElement('div');
+                dayHeaderDiv.className = 'day-header';
+                dayHeaderDiv.innerHTML = `
+                    <div class="day-title">${day}</div>
+                    <button class="col-edit-btn" title="Edit entire ${day}" onclick="openEditDayModal('${day}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                `;
+                dayHeader.appendChild(dayHeaderDiv);
+                headerRow.appendChild(dayHeader);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            slots.forEach(slot => {
+                const row = document.createElement('tr');
+                
+                // Time slot cell with edit button
+                const timeCell = document.createElement('td');
+                const timeCellDiv = document.createElement('div');
+                timeCellDiv.className = 'time-header';
+                timeCellDiv.innerHTML = `
+                    <div class="time-title">${slot}</div>
+                    <button class="row-edit-btn" title="Edit entire ${slot} slot" onclick="openEditRowModal('${slot}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                `;
+                timeCell.appendChild(timeCellDiv);
+                row.appendChild(timeCell);
+                
+                // Data cells for each day
+                days.forEach(day => {
+                    const cell = document.createElement('td');
+                    const entry = timetableData[day][slot];
+                    
+                    if (entry && entry.subject && entry.subject.trim() !== '') {
+                        const card = document.createElement('div');
+                        card.className = 'class-card';
+                        
+                        // Card content
+                        if (entry.period > 0) {
+                            const periodDiv = document.createElement('div');
+                            periodDiv.className = 'period';
+                            periodDiv.textContent = `Period ${entry.period}`;
+                            card.appendChild(periodDiv);
+                        }
+                        
+                        const subjectDiv = document.createElement('div');
+                        subjectDiv.className = 'subject';
+                        subjectDiv.textContent = entry.subject;
+                        card.appendChild(subjectDiv);
+                        
+                        if (entry.faculty) {
+                            const facultyDiv = document.createElement('div');
+                            facultyDiv.className = 'faculty';
+                            facultyDiv.textContent = entry.faculty;
+                            card.appendChild(facultyDiv);
+                        }
+                        
+                        if (entry.room) {
+                            const roomDiv = document.createElement('div');
+                            roomDiv.className = 'faculty';
+                            roomDiv.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${entry.room}`;
+                            card.appendChild(roomDiv);
+                        }
+                        
+                        // Edit/Delete controls
+                        const controlsDiv = document.createElement('div');
+                        controlsDiv.className = 'card-controls';
+                        controlsDiv.innerHTML = `
+                            <button class="ctrl-btn edit" title="Edit entry" onclick="openEditModal('${day}', '${slot}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="ctrl-btn delete" title="Delete entry" onclick="deleteEntry('${day}', '${slot}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `;
+                        card.appendChild(controlsDiv);
+                        
+                        cell.appendChild(card);
+                    } else {
+                        cell.className = 'empty';
+                        const addBtn = document.createElement('button');
+                        addBtn.className = 'ctrl-btn edit';
+                        addBtn.innerHTML = '<i class="fas fa-plus"></i> Add';
+                        addBtn.onclick = () => openEditModal(day, slot);
+                        cell.appendChild(addBtn);
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+        }
+        
+        // Show status message
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Open modal for editing single entry
+        function openEditModal(day, slot) {
+            const entry = timetableData[day][slot] || { period: 0, subject: '', faculty: '', room: '' };
+            
+            // Populate day dropdown
+            const daySelect = document.getElementById('modalDay');
+            daySelect.innerHTML = '';
+            days.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d;
+                if (d === day) option.selected = true;
+                daySelect.appendChild(option);
+            });
+            
+            // Populate slot dropdown
+            const slotSelect = document.getElementById('modalSlot');
+            slotSelect.innerHTML = '';
+            slots.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                if (s === slot) option.selected = true;
+                slotSelect.appendChild(option);
+            });
+            
+            // Fill form fields
+            document.getElementById('modalPeriod').value = entry.period || '';
+            document.getElementById('modalSubject').value = entry.subject || '';
+            document.getElementById('modalFaculty').value = entry.faculty || '';
+            document.getElementById('modalRoom').value = entry.room || '';
+            
+            // Store current editing context
+            window.currentEdit = { day, slot };
+            
+            // Show modal
+            document.getElementById('editModal').style.display = 'flex';
+            document.getElementById('modalSubject').focus();
+        }
+        
+        // Save single entry
+        function saveEntry() {
+            const day = document.getElementById('modalDay').value;
+            const slot = document.getElementById('modalSlot').value;
+            const period = parseInt(document.getElementById('modalPeriod').value) || 0;
+            const subject = document.getElementById('modalSubject').value.trim();
+            const faculty = document.getElementById('modalFaculty').value.trim();
+            const room = document.getElementById('modalRoom').value.trim();
+            
+            if (!subject) {
+                alert('Subject name is required!');
+                return;
+            }
+            
+            timetableData[day][slot] = { period, subject, faculty, room };
+            saveData();
+            buildTable();
+            closeEditModal();
+            showStatus('Entry saved successfully!');
+        }
+        
+        // Delete single entry
+        function deleteEntry(day, slot) {
+            if (confirm(`Delete entry for ${day} at ${slot}?`)) {
+                timetableData[day][slot] = { period: 0, subject: '', faculty: '', room: '' };
+                saveData();
+                buildTable();
+                showStatus('Entry deleted successfully!', 'success');
+                
+                // If modal is open for this entry, close it
+                if (window.currentEdit && window.currentEdit.day === day && window.currentEdit.slot === slot) {
+                    closeEditModal();
+                }
+            }
+        }
+        
+        // Open modal for editing entire day (column)
+        function openEditDayModal(day) {
+            document.getElementById('dayNameDisplay').textContent = day;
+            document.getElementById('currentDayName').textContent = day;
+            
+            const container = document.getElementById('dayEditorContainer');
+            container.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const entry = timetableData[day][slot] || { period: 0, subject: '', faculty: '', room: '' };
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bulk-edit-item';
+                itemDiv.innerHTML = `
+                    <div class="bulk-edit-item-header">
+                        <span>${slot}</span>
+                        ${entry.period > 0 ? `<span class="period">Period ${entry.period}</span>` : ''}
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control day-subject" data-slot="${slot}" 
+                                   value="${entry.subject || ''}" placeholder="Subject name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Faculty</label>
+                            <input type="text" class="form-control day-faculty" data-slot="${slot}" 
+                                   value="${entry.faculty || ''}" placeholder="Faculty name">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Room</label>
+                            <input type="text" class="form-control day-room" data-slot="${slot}" 
+                                   value="${entry.room || ''}" placeholder="Room number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Period</label>
+                            <input type="number" class="form-control day-period" data-slot="${slot}" 
+                                   value="${entry.period || ''}" min="0" max="10" placeholder="Period number">
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+            
+            document.getElementById('dayModal').style.display = 'flex';
+        }
+        
+        // Save entire day edits
+        function saveDayModal() {
+            const day = document.getElementById('dayNameDisplay').textContent;
+            
+            slots.forEach(slot => {
+                const subjectInput = document.querySelector(`.day-subject[data-slot="${slot}"]`);
+                const facultyInput = document.querySelector(`.day-faculty[data-slot="${slot}"]`);
+                const roomInput = document.querySelector(`.day-room[data-slot="${slot}"]`);
+                const periodInput = document.querySelector(`.day-period[data-slot="${slot}"]`);
+                
+                const subject = subjectInput ? subjectInput.value.trim() : '';
+                const faculty = facultyInput ? facultyInput.value.trim() : '';
+                const room = roomInput ? roomInput.value.trim() : '';
+                const period = periodInput ? parseInt(periodInput.value) || 0 : 0;
+                
+                timetableData[day][slot] = { period, subject, faculty, room };
+            });
+            
+            saveData();
+            buildTable();
+            closeDayModal();
+            showStatus(`All entries for ${day} updated successfully!`);
+        }
+        
+        // Open modal for editing entire row (time slot)
+        function openEditRowModal(slot) {
+            document.getElementById('rowSlotDisplay').textContent = slot;
+            document.getElementById('currentSlotName').textContent = slot;
+            document.getElementById('rowSlotLabel').value = slot;
+            
+            const container = document.getElementById('rowEditorContainer');
+            container.innerHTML = '';
+            
+            days.forEach(day => {
+                const entry = timetableData[day][slot] || { period: 0, subject: '', faculty: '', room: '' };
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bulk-edit-item';
+                itemDiv.innerHTML = `
+                    <div class="bulk-edit-item-header">
+                        <span>${day}</span>
+                        ${entry.period > 0 ? `<span class="period">Period ${entry.period}</span>` : ''}
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-control row-subject" data-day="${day}" 
+                                   value="${entry.subject || ''}" placeholder="Subject name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Faculty</label>
+                            <input type="text" class="form-control row-faculty" data-day="${day}" 
+                                   value="${entry.faculty || ''}" placeholder="Faculty name">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Room</label>
+                            <input type="text" class="form-control row-room" data-day="${day}" 
+                                   value="${entry.room || ''}" placeholder="Room number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col">
+                            <label class="form-label">Period</label>
+                            <input type="number" class="form-control row-period" data-day="${day}" 
+                                   value="${entry.period || ''}" min="0" max="10" placeholder="Period number">
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+            
+            document.getElementById('rowModal').style.display = 'flex';
+        }
+        
+        // Save entire row edits
+        function saveRowModal() {
+            const oldSlot = document.getElementById('rowSlotDisplay').textContent;
+            const newSlot = document.getElementById('rowSlotLabel').value.trim();
+            
+            // If slot time changed, update the slot in data structure
+            if (newSlot && newSlot !== oldSlot) {
+                // Update slots array
+                const slotIndex = slots.indexOf(oldSlot);
+                if (slotIndex !== -1) {
+                    slots[slotIndex] = newSlot;
+                }
+                
+                // Move data to new slot key
+                days.forEach(day => {
+                    if (timetableData[day][oldSlot]) {
+                        timetableData[day][newSlot] = timetableData[day][oldSlot];
+                        delete timetableData[day][oldSlot];
+                    }
+                });
+            }
+            
+            const targetSlot = newSlot || oldSlot;
+            
+            // Update all entries for this time slot
+            days.forEach(day => {
+                const subjectInput = document.querySelector(`.row-subject[data-day="${day}"]`);
+                const facultyInput = document.querySelector(`.row-faculty[data-day="${day}"]`);
+                const roomInput = document.querySelector(`.row-room[data-day="${day}"]`);
+                const periodInput = document.querySelector(`.row-period[data-day="${day}"]`);
+                
+                const subject = subjectInput ? subjectInput.value.trim() : '';
+                const faculty = facultyInput ? facultyInput.value.trim() : '';
+                const room = roomInput ? roomInput.value.trim() : '';
+                const period = periodInput ? parseInt(periodInput.value) || 0 : 0;
+                
+                timetableData[day][targetSlot] = { period, subject, faculty, room };
+            });
+            
+            saveData();
+            buildTable();
+            closeRowModal();
+            showStatus(`All entries for time slot ${targetSlot} updated successfully!`);
+        }
+        
+        // Add new time slot
+        function addNewTimeSlot() {
+            const newSlot = prompt('Enter new time slot (e.g., 17:00-18:00):');
+            if (newSlot && newSlot.trim() !== '') {
+                if (slots.includes(newSlot)) {
+                    alert('This time slot already exists!');
+                    return;
+                }
+                
+                slots.push(newSlot);
+                
+                // Initialize empty entries for new slot
+                days.forEach(day => {
+                    timetableData[day][newSlot] = { period: 0, subject: '', faculty: '', room: '' };
+                });
+                
+                saveData();
+                buildTable();
+                showStatus(`New time slot "${newSlot}" added!`);
+            }
+        }
+        
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify(timetableData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'timetable-data.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showStatus('Data exported successfully!');
+        }
+        
+        // Clear all data
+        function clearAllData() {
+            days.forEach(day => {
+                slots.forEach(slot => {
+                    timetableData[day][slot] = { period: 0, subject: '', faculty: '', room: '' };
+                });
+            });
+            
+            saveData();
+            buildTable();
+            closeClearModal();
+            showStatus('All data cleared!', 'success');
+        }
+        
+        // Modal close functions
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            window.currentEdit = null;
+        }
+        
+        function closeDayModal() {
+            document.getElementById('dayModal').style.display = 'none';
+        }
+        
+        function closeRowModal() {
+            document.getElementById('rowModal').style.display = 'none';
+        }
+        
+        function closeClearModal() {
+            document.getElementById('clearModal').style.display = 'none';
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load data and build table
+            loadData();
+            buildTable();
+            
+            // Back button: try history.back(), fallback to smart.html
+            const backBtn = document.getElementById('backBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        // fallback navigation
+                        window.location.href = 'smart.html';
+                    }
+                });
+            }
+             
+             // Edit modal events
+             document.getElementById('modalSave').addEventListener('click', saveEntry);
+             document.getElementById('modalDelete').addEventListener('click', () => {
+                 if (window.currentEdit) {
+                     deleteEntry(window.currentEdit.day, window.currentEdit.slot);
+                 }
+             });
+             document.getElementById('modalCancel').addEventListener('click', closeEditModal);
+             document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+             
+             // Day modal events
+             document.getElementById('daySave').addEventListener('click', saveDayModal);
+             document.getElementById('dayCancel').addEventListener('click', closeDayModal);
+             document.getElementById('closeDayModal').addEventListener('click', closeDayModal);
+             
+             // Row modal events
+             document.getElementById('rowSave').addEventListener('click', saveRowModal);
+             document.getElementById('rowCancel').addEventListener('click', closeRowModal);
+             document.getElementById('closeRowModal').addEventListener('click', closeRowModal);
+             
+             // Clear modal events
+             document.getElementById('clearConfirm').addEventListener('click', clearAllData);
+             document.getElementById('clearCancel').addEventListener('click', closeClearModal);
+             document.getElementById('closeClearModal').addEventListener('click', closeClearModal);
+             
+             // Header button events
+             document.getElementById('addNewBtn').addEventListener('click', () => {
+                 openEditModal(days[0], slots[0]);
+             });
+             
+             document.getElementById('exportBtn').addEventListener('click', exportData);
+             
+             document.getElementById('clearAllBtn').addEventListener('click', () => {
+                 document.getElementById('clearModal').style.display = 'flex';
+             });
+             
+             // Close modals when clicking outside
+             document.querySelectorAll('.modal-overlay').forEach(modal => {
+                 modal.addEventListener('click', (e) => {
+                     if (e.target === modal) {
+                         if (modal.id === 'editModal') closeEditModal();
+                         if (modal.id === 'dayModal') closeDayModal();
+                         if (modal.id === 'rowModal') closeRowModal();
+                         if (modal.id === 'clearModal') closeClearModal();
+                     }
+                 });
+             });
+             
+             // Keyboard shortcuts
+             document.addEventListener('keydown', (e) => {
+                 if (e.key === 'Escape') {
+                     closeEditModal();
+                     closeDayModal();
+                     closeRowModal();
+                     closeClearModal();
+                 }
+                
+                 // Ctrl+S to save in edit modal
+                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                     e.preventDefault();
+                     if (document.getElementById('editModal').style.display === 'flex') {
+                         saveEntry();
+                     }
+                 }
+             });
+         });
+        
+        // Make functions available globally
+        window.openEditModal = openEditModal;
+        window.deleteEntry = deleteEntry;
+        window.openEditDayModal = openEditDayModal;
+        window.openEditRowModal = openEditRowModal;
+        window.addNewTimeSlot = addNewTimeSlot;
+    </script>
+</body>
+</html>

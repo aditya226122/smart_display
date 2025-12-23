@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance System - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--success);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .system-info {
+            display: flex;
+            gap: 25px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 90px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 0;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 0.9rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--light-gray);
+        }
+
+        .nav-item.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .page-title p {
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #2ab4d6;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #e11570;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .present-icon {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+
+        .absent-icon {
+            background-color: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+
+        .total-icon {
+            background-color: rgba(67, 97, 238, 0.2);
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-change {
+            font-size: 0.85rem;
+        }
+
+        .positive {
+            color: #10b981;
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        /* Attendance Table */
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f1f5f9;
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .present-badge {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: var(--success);
+        }
+
+        .absent-badge {
+            background-color: rgba(247, 37, 133, 0.2);
+            color: var(--danger);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light-gray);
+            background-color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .nav-text {
+                display: none;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 1rem;
+            }
+            
+            .system-info {
+                gap: 15px;
+            }
+            
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 0;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+            }
+            
+            .nav-item {
+                white-space: nowrap;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Smart Attendance System</h1>
+                <p>Raspberry Pi Powered Classroom Monitoring</p>
+            </div>
+        </div>
+        
+        <div class="system-info">
+            <div class="info-item">
+                <div class="info-label">Last Updated</div>
+                <div class="info-value" id="last-updated">Today, 10:45 AM</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Camera Status</div>
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>Live Feed Active</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span class="nav-text">Dashboard</span>
+                </li>
+                <li class="nav-item">
+                    <a href="timetable.html" style="display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none; width:100%; padding:0.9rem 1.5rem;">
+                        <i class="fas fa-calendar-alt nav-icon"></i>
+                        <span class="nav-text">Timetable</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" style="display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none; width:100%; padding:0.9rem 1.5rem;">
+                        <i class="fas fa-chart-bar nav-icon"></i>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="student.html" style="display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none; width:100%; padding:0.9rem 1.5rem;">
+                        <i class="fas fa-users nav-icon"></i>
+                        <span class="nav-text">Students</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-text">Settings</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="page-title">
+                    <h2>Today's Attendance Overview</h2>
+                    <p>Monday, October 23, 2023 | Real-time monitoring from Raspberry Pi Camera</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="addTimetableBtn">
+                        <i class="fas fa-plus"></i> Add Timetable Entry
+                    </button>
+                    <button class="btn btn-success" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon present-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="card-title">Total Present Today</div>
+                    <div class="card-value" id="total-present">142</div>
+                    <div class="card-change positive">
+                        <i class="fas fa-arrow-up"></i> 8% from yesterday
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon absent-icon">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="card-title">Total Absent Today</div>
+                    <div class="card-value" id="total-absent">18</div>
+                    <div class="card-change negative">
+                        <i class="fas fa-arrow-down"></i> 2% from yesterday
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon total-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-title">Total Students</div>
+                    <div class="card-value" id="total-students">160</div>
+                    <div class="card-change">
+                        <i class="fas fa-minus"></i> No change
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon total-icon">
+                        <i class="fas fa-chalkboard"></i>
+                    </div>
+                    <div class="card-title">Today's Classes</div>
+                    <div class="card-value" id="total-classes">6</div>
+                    <div class="card-change">
+                        <i class="fas fa-clock"></i> 2 remaining
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Period No.</th>
+                            <th>Subject Name</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Attendance %</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Footer -->
+            <div class="footer">
+                <p>Smart Attendance System &copy; 2023 | Powered by Raspberry Pi | Last sync: <span id="current-time">10:45:23 AM</span></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Timetable Modal -->
+    <div class="modal-overlay" id="timetableModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Timetable Entry</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="timetableForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="date">Date</label>
+                            <input type="date" class="form-control" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="day">Day</label>
+                            <select class="form-control" id="day" required>
+                                <option value="">Select Day</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="startTime">Start Time</label>
+                            <input type="time" class="form-control" id="startTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="endTime">End Time</label>
+                            <input type="time" class="form-control" id="endTime" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="period">Period No.</label>
+                            <input type="number" class="form-control" id="period" min="1" max="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="subject">Subject Name</label>
+                            <input type="text" class="form-control" id="subject" placeholder="e.g., Mathematics" required>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Class/Year and Section -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="classOrYear">Class / Year</label>
+                            <input type="text" class="form-control" id="classOrYear" placeholder="e.g., 10th Grade, Year 2" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="section">Section</label>
+                            <input type="text" class="form-control" id="section" placeholder="e.g., A" required>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Branch/Department and Fixed Students -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="branch">Branch / Department</label>
+                            <input type="text" class="form-control" id="branch" placeholder="e.g., Science" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="fixedStudents">Fixed No. of Students</label>
+                            <input type="number" class="form-control" id="fixedStudents" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="present">Present Count</label>
+                            <input type="number" class="form-control" id="present" min="0" required>
+                        </div>
+                        <!-- absent input removed as requested -->
+                    </div>
+                    
+                    <input type="hidden" id="entryId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="cancelBtn">Cancel</button>
+                <button class="btn btn-success" id="saveBtn">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for attendance records
+        let attendanceData = [
+            { id: 1, date: "2023-10-23", day: "Monday", startTime: "09:00", endTime: "10:00", period: 1, subject: "Mathematics", present: 145, absent: 15 },
+            { id: 2, date: "2023-10-23", day: "Monday", startTime: "10:15", endTime: "11:15", period: 2, subject: "Physics", present: 138, absent: 22 },
+            { id: 3, date: "2023-10-23", day: "Monday", startTime: "11:30", endTime: "12:30", period: 3, subject: "Chemistry", present: 150, absent: 10 },
+            { id: 4, date: "2023-10-23", day: "Monday", startTime: "13:30", endTime: "14:30", period: 4, subject: "Computer Science", present: 155, absent: 5 },
+            { id: 5, date: "2023-10-23", day: "Monday", startTime: "14:45", endTime: "15:45", period: 5, subject: "English", present: 140, absent: 20 },
+            { id: 6, date: "2023-10-22", day: "Sunday", startTime: "09:00", endTime: "10:00", period: 1, subject: "Biology", present: 148, absent: 12 },
+            { id: 7, date: "2023-10-22", day: "Sunday", startTime: "10:15", endTime: "11:15", period: 2, subject: "History", present: 135, absent: 25 }
+        ];
+
+        // DOM Elements
+        const tableBody = document.getElementById('attendance-table-body');
+        const totalPresentEl = document.getElementById('total-present');
+        const totalAbsentEl = document.getElementById('total-absent');
+        const totalStudentsEl = document.getElementById('total-students');
+        const totalClassesEl = document.getElementById('total-classes');
+        const lastUpdatedEl = document.getElementById('last-updated');
+        const currentTimeEl = document.getElementById('current-time');
+        
+        // Modal Elements
+        const timetableModal = document.getElementById('timetableModal');
+        const addTimetableBtn = document.getElementById('addTimetableBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const timetableForm = document.getElementById('timetableForm');
+        const refreshBtn = document.getElementById('refreshBtn');
+        
+        // Form Elements
+        const dateInput = document.getElementById('date');
+        const dayInput = document.getElementById('day');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        const periodInput = document.getElementById('period');
+        const subjectInput = document.getElementById('subject');
+        const presentInput = document.getElementById('present');
+        // removed absentInput from form as requested
+        const entryIdInput = document.getElementById('entryId');
+
+        // NEW form fields
+        const classInput = document.getElementById('classOrYear');
+        const sectionInput = document.getElementById('section');
+        const branchInput = document.getElementById('branch');
+        const fixedStudentsInput = document.getElementById('fixedStudents');
+        
+        let isEditMode = false;
+        let currentEditId = null;
+        
+        // Initialize the dashboard
+        function initDashboard() {
+            renderTable();
+            updateSummaryCards();
+            updateTime();
+            
+            // Set today's date as default in form
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+            
+            // Set day based on date
+            updateDayFromDate();
+            
+            // Auto-update time every second
+            setInterval(updateTime, 1000);
+        }
+        
+        // Render attendance table
+        function renderTable() {
+            tableBody.innerHTML = '';
+            
+            // Sort by date and period
+            attendanceData.sort((a, b) => {
+                if (a.date === b.date) {
+                    return a.period - b.period;
+                }
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            attendanceData.forEach(record => {
+                // derive total students: prefer fixedStudents if provided, fall back to present+absent
+                const totalStudents = record.fixedStudents ?? (record.present + (record.absent ?? 0));
+                const absentCount = (record.absent ?? Math.max(0, totalStudents - record.present));
+                const attendancePercent = totalStudents > 0 ? Math.round((record.present / totalStudents) * 100) : 0;
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${formatDate(record.date)}</td>
+                    <td>${record.day}</td>
+                    <td>${record.startTime} - ${record.endTime}</td>
+                    <td>${record.period}</td>
+                    <td>${record.subject}</td>
+                    <td><span class="status-badge present-badge">${record.present}</span></td>
+                    <td><span class="status-badge absent-badge">${absentCount}</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; height: 8px; background-color: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${attendancePercent}%; height: 100%; background-color: ${attendancePercent >= 80 ? '#10b981' : attendancePercent >= 60 ? '#f59e0b' : '#ef4444'};"></div>
+                            </div>
+                            <span>${attendancePercent}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editEntry(${record.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteEntry(${record.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update summary cards
+        function updateSummaryCards() {
+            // Calculate totals for today
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecords = attendanceData.filter(record => record.date === today);
+            
+            let totalPresent = 0;
+            let totalAbsent = 0;
+            let totalStudents = 0;
+            
+            if (todayRecords.length > 0) {
+                // Calculate average present across today's classes
+                totalPresent = Math.round(todayRecords.reduce((sum, record) => sum + record.present, 0) / todayRecords.length);
+                
+                // For absent: prefer fixedStudents - present if fixedStudents exists
+                totalAbsent = Math.round(todayRecords.reduce((sum, record) => {
+                    const total = record.fixedStudents ?? (record.present + (record.absent ?? 0));
+                    const abs = total - record.present;
+                    return sum + Math.max(0, abs);
+                }, 0) / todayRecords.length);
+                
+                totalStudents = totalPresent + totalAbsent;
+            } else {
+                // Use latest data if no today's records
+                const latestRecord = attendanceData[0];
+                const total = latestRecord.fixedStudents ?? (latestRecord.present + (latestRecord.absent ?? 0));
+                totalPresent = latestRecord.present;
+                totalAbsent = total - latestRecord.present;
+                totalStudents = total;
+            }
+            
+            totalPresentEl.textContent = totalPresent;
+            totalAbsentEl.textContent = totalAbsent;
+            totalStudentsEl.textContent = totalStudents;
+            totalClassesEl.textContent = attendanceData.filter(record => record.date === today).length;
+        }
+        
+        // Update time displays
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            currentTimeEl.textContent = timeString;
+            
+            // Update last updated time randomly to simulate real-time updates
+            if (Math.random() > 0.7) {
+                const minutesAgo = Math.floor(Math.random() * 5);
+                lastUpdatedEl.textContent = minutesAgo === 0 ? 'Just now' : `${minutesAgo} min ago`;
+            }
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        
+        // Update day based on selected date
+        function updateDayFromDate() {
+            if (dateInput.value) {
+                const date = new Date(dateInput.value);
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                dayInput.value = days[date.getDay()];
+            }
+        }
+        
+        // Open modal for adding new entry
+        function openAddModal() {
+            isEditMode = false;
+            modalTitle.textContent = 'Add Timetable Entry';
+            timetableForm.reset();
+            entryIdInput.value = '';
+            
+            // Set default values
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+            updateDayFromDate();
+            
+            // Set default time (next hour)
+            const now = new Date();
+            const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
+            startTimeInput.value = `${String(nextHour.getHours()).padStart(2, '0')}:${String(nextHour.getMinutes()).padStart(2, '0')}`;
+            
+            // Set end time (1 hour later)
+            const endHour = new Date(nextHour.getTime() + 60 * 60 * 1000);
+            endTimeInput.value = `${String(endHour.getHours()).padStart(2, '0')}:${String(endHour.getMinutes()).padStart(2, '0')}`;
+            
+            // Set default period (next available)
+            const todayRecords = attendanceData.filter(record => record.date === today);
+            periodInput.value = todayRecords.length + 1;
+            
+            // Set default present and fixed students
+            presentInput.value = 150;
+            fixedStudentsInput.value = 160;
+            
+            // default class/section/branch
+            classInput.value = '';
+            sectionInput.value = 'A';
+            branchInput.value = '';
+            
+            timetableModal.style.display = 'flex';
+        }
+        
+        // Open modal for editing entry
+        function editEntry(id) {
+            isEditMode = true;
+            modalTitle.textContent = 'Edit Timetable Entry';
+            
+            const record = attendanceData.find(item => item.id === id);
+            if (record) {
+                dateInput.value = record.date;
+                dayInput.value = record.day;
+                startTimeInput.value = record.startTime;
+                endTimeInput.value = record.endTime;
+                periodInput.value = record.period;
+                subjectInput.value = record.subject;
+                presentInput.value = record.present;
+                // populate new fields if available; fallback to derived values
+                classInput.value = record.classOrYear || '';
+                sectionInput.value = record.section || '';
+                branchInput.value = record.branch || '';
+                fixedStudentsInput.value = record.fixedStudents ?? (record.present + (record.absent ?? 0));
+                entryIdInput.value = record.id;
+                
+                timetableModal.style.display = 'flex';
+            }
+        }
+        
+        // Delete entry
+        function deleteEntry(id) {
+            if (confirm('Are you sure you want to delete this timetable entry?')) {
+                attendanceData = attendanceData.filter(item => item.id !== id);
+                renderTable();
+                updateSummaryCards();
+                showNotification('Timetable entry deleted successfully!', 'success');
+            }
+        }
+        
+        // Save entry (add or update)
+        function saveEntry() {
+            // Validate form
+            if (!timetableForm.checkValidity()) {
+                timetableForm.reportValidity();
+                return;
+            }
+            
+            const fixedStudentsVal = parseInt(fixedStudentsInput.value, 10);
+            const presentVal = parseInt(presentInput.value, 10);
+            const computedAbsent = Math.max(0, fixedStudentsVal - presentVal);
+            
+            const entryData = {
+                id: isEditMode ? parseInt(entryIdInput.value) : attendanceData.length > 0 ? Math.max(...attendanceData.map(item => item.id)) + 1 : 1,
+                date: dateInput.value,
+                day: dayInput.value,
+                startTime: startTimeInput.value,
+                endTime: endTimeInput.value,
+                period: parseInt(periodInput.value),
+                subject: subjectInput.value,
+                present: presentVal,
+                // store absent computed from fixedStudents - present
+                absent: computedAbsent,
+                // new fields
+                classOrYear: classInput.value,
+                section: sectionInput.value,
+                branch: branchInput.value,
+                fixedStudents: fixedStudentsVal
+            };
+            
+            if (isEditMode) {
+                // Update existing entry
+                const index = attendanceData.findIndex(item => item.id === entryData.id);
+                if (index !== -1) {
+                    attendanceData[index] = entryData;
+                    showNotification('Timetable entry updated successfully!', 'success');
+                }
+            } else {
+                // Add new entry
+                attendanceData.push(entryData);
+                showNotification('Timetable entry added successfully!', 'success');
+            }
+            
+            // Close modal and update UI
+            timetableModal.style.display = 'none';
+            renderTable();
+            updateSummaryCards();
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1001;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Add CSS for notification animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Event Listeners
+        addTimetableBtn.addEventListener('click', openAddModal);
+        
+        closeModalBtn.addEventListener('click', () => {
+            timetableModal.style.display = 'none';
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            timetableModal.style.display = 'none';
+        });
+        
+        saveBtn.addEventListener('click', saveEntry);
+        
+        dateInput.addEventListener('change', updateDayFromDate);
+        
+        refreshBtn.addEventListener('click', () => {
+            // Simulate data refresh
+            showNotification('Refreshing data from Raspberry Pi...', 'success');
+            
+            // In a real application, you would fetch new data from the server here
+            // For now, we'll just update the time and simulate a small data change
+            updateTime();
+            
+            // Simulate a small random change in data
+            if (attendanceData.length > 0 && Math.random() > 0.5) {
+                const randomIndex = Math.floor(Math.random() * attendanceData.length);
+                attendanceData[randomIndex].present += Math.floor(Math.random() * 5) - 2;
+                attendanceData[randomIndex].absent += Math.floor(Math.random() * 5) - 2;
+                
+                // Ensure values don't go negative
+                attendanceData[randomIndex].present = Math.max(attendanceData[randomIndex].present, 0);
+                attendanceData[randomIndex].absent = Math.max(attendanceData[randomIndex].absent, 0);
+                
+                renderTable();
+                updateSummaryCards();
+            }
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target === timetableModal) {
+                timetableModal.style.display = 'none';
+            }
+        });
+        
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

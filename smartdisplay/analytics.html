@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --chart-blue: #4361ee;
+            --chart-green: #4cc9f0;
+            --chart-red: #f72585;
+            --chart-orange: #f8961e;
+            --chart-purple: #7209b7;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fb 0%, #e9ecef 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 6px solid var(--primary);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .date-info {
+            text-align: right;
+        }
+
+        .current-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .last-updated {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 5px solid;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.present {
+            border-color: var(--chart-green);
+        }
+
+        .stat-card.absent {
+            border-color: var(--chart-red);
+        }
+
+        .stat-card.classes {
+            border-color: var(--chart-blue);
+        }
+
+        .stat-card.attendance {
+            border-color: var(--chart-purple);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .present .stat-icon {
+            background: linear-gradient(135deg, rgba(76, 201, 240, 0.2), rgba(76, 201, 240, 0.1));
+            color: var(--chart-green);
+        }
+
+        .absent .stat-icon {
+            background: linear-gradient(135deg, rgba(247, 37, 133, 0.2), rgba(247, 37, 133, 0.1));
+            color: var(--chart-red);
+        }
+
+        .classes .stat-icon {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(67, 97, 238, 0.1));
+            color: var(--chart-blue);
+        }
+
+        .attendance .stat-icon {
+            background: linear-gradient(135deg, rgba(114, 9, 183, 0.2), rgba(114, 9, 183, 0.1));
+            color: var(--chart-purple);
+        }
+
+        .stat-content h3 {
+            font-size: 14px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .present .stat-value {
+            color: var(--chart-green);
+        }
+
+        .absent .stat-value {
+            color: var(--chart-red);
+        }
+
+        .classes .stat-value {
+            color: var(--chart-blue);
+        }
+
+        .attendance .stat-value {
+            color: var(--chart-purple);
+        }
+
+        .stat-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .positive {
+            color: #10b981;
+        }
+
+        .negative {
+            color: var(--chart-red);
+        }
+
+        /* Charts Section */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1300px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-title i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-filter {
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .time-filter:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .time-filter.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        /* Subject Analysis Table */
+        .analysis-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-header h2 i {
+            color: var(--primary);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f1f5f9, #e9ecef);
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid var(--light-gray);
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .high-attendance {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+        }
+
+        .medium-attendance {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+
+        .low-attendance {
+            background: linear-gradient(90deg, #f87171, #ef4444);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 14px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            font-size: 18px;
+            color: var(--gray);
+        }
+
+        .loading:after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light-gray);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 20px;
+            }
+            
+            .date-info {
+                text-align: left;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-card {
+                height: 400px;
+                padding: 15px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .chart-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .table-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .chart-card {
+                height: 350px;
+            }
+            
+            th, td {
+                padding: 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Attendance Analytics Dashboard</h1>
+                    <p>Real-time analysis of student attendance patterns</p>
+                </div>
+            </div>
+            <div class="date-info">
+                <div class="current-date" id="currentDate">Loading...</div>
+                <div class="last-updated">
+                    Last updated: <span id="lastUpdated">Just now</span>
+                    <span class="live-indicator">
+                        <span class="live-dot"></span>
+                        LIVE
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card present">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Present Today</h3>
+                    <div class="stat-value" id="totalPresent">0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span id="presentChange">0%</span> from yesterday
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card absent">
+                <div class="stat-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Absent Today</h3>
+                    <div class="stat-value" id="totalAbsent">0</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i>
+                        <span id="absentChange">0%</span> from yesterday
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card classes">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Classes Today</h3>
+                    <div class="stat-value" id="totalClasses">0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="classesChange">0%</span> this week
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card attendance">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Average Attendance</h3>
+                    <div class="stat-value" id="avgAttendance">0%</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-trend-up"></i>
+                        <span id="attendanceChange">0%</span> improvement
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-container">
+            <!-- Chart 1: Day vs Present Count -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-calendar-day"></i>
+                        Daily Attendance Trend
+                    </div>
+                    <div class="chart-controls">
+                        <button class="time-filter active" data-period="7">7 Days</button>
+                        <button class="time-filter" data-period="14">14 Days</button>
+                        <button class="time-filter" data-period="30">30 Days</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="dayVsPresentChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Chart 2: Subject vs Present/Absent -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-book-open"></i>
+                        Subject-wise Attendance
+                    </div>
+                    <div class="chart-controls">
+                        <button class="time-filter active" data-view="present">Present</button>
+                        <button class="time-filter" data-view="absent">Absent</button>
+                        <button class="time-filter" data-view="both">Both</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="subjectVsAttendanceChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Chart 3: Subject vs Classes Held -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chalkboard"></i>
+                        Classes Conducted by Subject
+                    </div>
+                    <div class="chart-controls">
+                        <button class="time-filter active" data-range="week">This Week</button>
+                        <button class="time-filter" data-range="month">This Month</button>
+                        <button class="time-filter" data-range="all">All Time</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="subjectVsClassesChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Chart 4: Attendance Distribution -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Attendance Distribution
+                    </div>
+                    <div class="chart-controls">
+                        <button class="time-filter active" data-type="subject">By Subject</button>
+                        <button class="time-filter" data-type="day">By Day</button>
+                        <button class="time-filter" data-type="time">By Time</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="attendanceDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Analysis Table -->
+        <div class="analysis-table-container">
+            <div class="table-header">
+                <h2><i class="fas fa-table"></i> Detailed Subject Analysis</h2>
+                <div class="table-actions">
+                    <button class="btn btn-outline" id="refreshData">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                    <button class="btn btn-primary" id="exportData">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Classes Held</th>
+                            <th>Total Present</th>
+                            <th>Total Absent</th>
+                            <th>Attendance Rate</th>
+                            <th>Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectTableBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Attendance Analytics Dashboard &copy; 2023 | Data updates automatically | Powered by Raspberry Pi Camera System</p>
+            <p>Last data sync: <span id="lastSyncTime">Loading...</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample data structure for attendance records
+        let attendanceData = {
+            subjects: ['Mathematics', 'Physics', 'Chemistry', 'Computer Science', 'English', 'Biology', 'History', 'Geography'],
+            days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            records: []
+        };
+
+        // Initialize charts
+        let dayVsPresentChart;
+        let subjectVsAttendanceChart;
+        let subjectVsClassesChart;
+        let attendanceDistributionChart;
+
+        // DOM Elements
+        const currentDateEl = document.getElementById('currentDate');
+        const lastUpdatedEl = document.getElementById('lastUpdated');
+        const lastSyncTimeEl = document.getElementById('lastSyncTime');
+        const totalPresentEl = document.getElementById('totalPresent');
+        const totalAbsentEl = document.getElementById('totalAbsent');
+        const totalClassesEl = document.getElementById('totalClasses');
+        const avgAttendanceEl = document.getElementById('avgAttendance');
+        const presentChangeEl = document.getElementById('presentChange');
+        const absentChangeEl = document.getElementById('absentChange');
+        const classesChangeEl = document.getElementById('classesChange');
+        const attendanceChangeEl = document.getElementById('attendanceChange');
+        const subjectTableBody = document.getElementById('subjectTableBody');
+        const refreshDataBtn = document.getElementById('refreshData');
+        const exportDataBtn = document.getElementById('exportData');
+
+        // Initialize the dashboard
+        function initDashboard() {
+            // Set current date
+            updateCurrentDate();
+            
+            // Generate sample data (in real app, this would come from API)
+            generateSampleData();
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Update UI with data
+            updateDashboardStats();
+            updateSubjectAnalysisTable();
+            
+            // Set up auto-refresh
+            setInterval(updateDashboardData, 30000); // Update every 30 seconds
+            
+            // Update last updated time every minute
+            setInterval(updateLastUpdatedTime, 60000);
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Update current date display
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.textContent = now.toLocaleDateString('en-US', options);
+            
+            // Update sync time
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            lastSyncTimeEl.textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+
+        // Update last updated time
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const minutesAgo = Math.floor(Math.random() * 5); // Simulate random updates
+            if (minutesAgo === 0) {
+                lastUpdatedEl.textContent = 'Just now';
+            } else if (minutesAgo === 1) {
+                lastUpdatedEl.textContent = '1 minute ago';
+            } else {
+                lastUpdatedEl.textContent = `${minutesAgo} minutes ago`;
+            }
+        }
+
+        // Generate sample data for demonstration
+        function generateSampleData() {
+            attendanceData.records = [];
+            const today = new Date();
+            
+            // Generate data for last 30 days
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                
+                // Generate records for each subject
+                attendanceData.subjects.forEach(subject => {
+                    const totalStudents = Math.floor(Math.random() * 30) + 70; // 70-100 students
+                    const present = Math.floor(Math.random() * 20) + (totalStudents - 25); // 45-100 presents
+                    const absent = totalStudents - present;
+                    
+                    attendanceData.records.push({
+                        date: date.toISOString().split('T')[0],
+                        day: dayName,
+                        subject: subject,
+                        present: present,
+                        absent: absent,
+                        totalStudents: totalStudents,
+                        period: Math.floor(Math.random() * 8) + 1,
+                        time: `${8 + Math.floor(Math.random() * 8)}:00`
+                    });
+                });
+            }
+        }
+
+        // Initialize all charts
+        function initializeCharts() {
+            // Chart 1: Day vs Present Count (Line Chart)
+            const dayVsPresentCtx = document.getElementById('dayVsPresentChart').getContext('2d');
+            dayVsPresentChart = new Chart(dayVsPresentCtx, {
+                type: 'line',
+                data: getDayVsPresentData(7),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Present Students'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Subject vs Present/Absent (Bar Chart)
+            const subjectVsAttendanceCtx = document.getElementById('subjectVsAttendanceChart').getContext('2d');
+            subjectVsAttendanceChart = new Chart(subjectVsAttendanceCtx, {
+                type: 'bar',
+                data: getSubjectVsAttendanceData('present'),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Students'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Subject vs Classes Held (Bar Chart)
+            const subjectVsClassesCtx = document.getElementById('subjectVsClassesChart').getContext('2d');
+            subjectVsClassesChart = new Chart(subjectVsClassesCtx, {
+                type: 'bar',
+                data: getSubjectVsClassesData('week'),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Classes'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Attendance Distribution (Doughnut Chart)
+            const attendanceDistributionCtx = document.getElementById('attendanceDistributionChart').getContext('2d');
+            attendanceDistributionChart = new Chart(attendanceDistributionCtx, {
+                type: 'doughnut',
+                data: getAttendanceDistributionData('subject'),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        }
+
+        // Get data for Day vs Present chart
+        function getDayVsPresentData(daysCount) {
+            const today = new Date();
+            const labels = [];
+            const presentData = [];
+            const absentData = [];
+            
+            // Get data for specified number of days
+            for (let i = daysCount - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                // Calculate total present/absent for this day
+                const dayRecords = attendanceData.records.filter(r => r.date === dateStr);
+                const totalPresent = dayRecords.reduce((sum, r) => sum + r.present, 0);
+                const totalAbsent = dayRecords.reduce((sum, r) => sum + r.absent, 0);
+                
+                labels.push(`${dayName} ${date.getDate()}`);
+                presentData.push(totalPresent);
+                absentData.push(totalAbsent);
+            }
+            
+            return {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Present Students',
+                        data: presentData,
+                        borderColor: '#4cc9f0',
+                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Absent Students',
+                        data: absentData,
+                        borderColor: '#f72585',
+                        backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            };
+        }
+
+        // Get data for Subject vs Attendance chart
+        function getSubjectVsAttendanceData(viewType) {
+            const subjects = attendanceData.subjects;
+            const presentData = [];
+            const absentData = [];
+            
+            // Get today's date
+            const today = new Date().toISOString().split('T')[0];
+            
+            subjects.forEach(subject => {
+                const subjectRecords = attendanceData.records.filter(r => 
+                    r.subject === subject && r.date === today
+                );
+                
+                if (subjectRecords.length > 0) {
+                    const totalPresent = subjectRecords.reduce((sum, r) => sum + r.present, 0);
+                    const totalAbsent = subjectRecords.reduce((sum, r) => sum + r.absent, 0);
+                    presentData.push(totalPresent);
+                    absentData.push(totalAbsent);
+                } else {
+                    presentData.push(0);
+                    absentData.push(0);
+                }
+            });
+            
+            const datasets = [];
+            
+            if (viewType === 'present' || viewType === 'both') {
+                datasets.push({
+                    label: 'Present',
+                    data: presentData,
+                    backgroundColor: '#4cc9f0',
+                    borderColor: '#4cc9f0',
+                    borderWidth: 1
+                });
+            }
+            
+            if (viewType === 'absent' || viewType === 'both') {
+                datasets.push({
+                    label: 'Absent',
+                    data: absentData,
+                    backgroundColor: '#f72585',
+                    borderColor: '#f72585',
+                    borderWidth: 1
+                });
+            }
+            
+            return {
+                labels: subjects,
+                datasets: datasets
+            };
+        }
+
+        // Get data for Subject vs Classes chart
+        function getSubjectVsClassesData(timeRange) {
+            const subjects = attendanceData.subjects;
+            const classesData = [];
+            
+            // Calculate date range
+            const today = new Date();
+            let startDate = new Date(today);
+            
+            if (timeRange === 'week') {
+                startDate.setDate(today.getDate() - 7);
+            } else if (timeRange === 'month') {
+                startDate.setMonth(today.getMonth() - 1);
+            }
+            // For 'all', startDate remains today (will use all records)
+            
+            const startDateStr = timeRange === 'all' ? null : startDate.toISOString().split('T')[0];
+            const todayStr = today.toISOString().split('T')[0];
+            
+            subjects.forEach(subject => {
+                const subjectRecords = attendanceData.records.filter(r => 
+                    r.subject === subject && 
+                    (timeRange === 'all' || (r.date >= startDateStr && r.date <= todayStr))
+                );
+                classesData.push(subjectRecords.length);
+            });
+            
+            // Generate colors based on number of classes
+            const backgroundColors = classesData.map(count => {
+                if (count > 15) return '#4361ee';
+                if (count > 10) return '#4cc9f0';
+                if (count > 5) return '#f8961e';
+                return '#f72585';
+            });
+            
+            return {
+                labels: subjects,
+                datasets: [{
+                    label: 'Classes Held',
+                    data: classesData,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                    borderWidth: 1
+                }]
+            };
+        }
+
+        // Get data for Attendance Distribution chart
+        function getAttendanceDistributionData(distributionType) {
+            let labels = [];
+            let data = [];
+            let backgroundColors = [];
+            
+            if (distributionType === 'subject') {
+                labels = attendanceData.subjects;
+                const today = new Date().toISOString().split('T')[0];
+                
+                attendanceData.subjects.forEach((subject, index) => {
+                    const subjectRecords = attendanceData.records.filter(r => 
+                        r.subject === subject && r.date === today
+                    );
+                    
+                    if (subjectRecords.length > 0) {
+                        const totalPresent = subjectRecords.reduce((sum, r) => sum + r.present, 0);
+                        const totalStudents = subjectRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+                        const attendanceRate = totalStudents > 0 ? (totalPresent / totalStudents) * 100 : 0;
+                        data.push(attendanceRate);
+                    } else {
+                        data.push(0);
+                    }
+                    
+                    // Assign color based on index
+                    const colors = ['#4361ee', '#4cc9f0', '#f8961e', '#f72585', '#7209b7', '#10b981', '#f59e0b', '#ef4444'];
+                    backgroundColors.push(colors[index % colors.length]);
+                });
+            } else if (distributionType === 'day') {
+                labels = attendanceData.days;
+                
+                attendanceData.days.forEach((day, index) => {
+                    const dayRecords = attendanceData.records.filter(r => r.day === day);
+                    if (dayRecords.length > 0) {
+                        const totalPresent = dayRecords.reduce((sum, r) => sum + r.present, 0);
+                        const totalStudents = dayRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+                        const attendanceRate = totalStudents > 0 ? (totalPresent / totalStudents) * 100 : 0;
+                        data.push(attendanceRate);
+                    } else {
+                        data.push(0);
+                    }
+                    
+                    const colors = ['#4361ee', '#4cc9f0', '#f8961e', '#f72585', '#7209b7', '#10b981'];
+                    backgroundColors.push(colors[index % colors.length]);
+                });
+            } else if (distributionType === 'time') {
+                labels = ['Morning (8-11)', 'Afternoon (11-2)', 'Evening (2-5)'];
+                data = [75, 82, 68]; // Sample data
+                backgroundColors = ['#4361ee', '#4cc9f0', '#f8961e'];
+            }
+            
+            return {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                    borderWidth: 2
+                }]
+            };
+        }
+
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            // Get today's records
+            const todayRecords = attendanceData.records.filter(r => r.date === today);
+            const yesterdayRecords = attendanceData.records.filter(r => r.date === yesterdayStr);
+            
+            // Calculate totals for today
+            const totalPresentToday = todayRecords.reduce((sum, r) => sum + r.present, 0);
+            const totalAbsentToday = todayRecords.reduce((sum, r) => sum + r.absent, 0);
+            const totalClassesToday = todayRecords.length;
+            const totalStudentsToday = todayRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+            const avgAttendanceToday = totalStudentsToday > 0 ? 
+                Math.round((totalPresentToday / totalStudentsToday) * 100) : 0;
+            
+            // Calculate totals for yesterday
+            const totalPresentYesterday = yesterdayRecords.reduce((sum, r) => sum + r.present, 0);
+            const totalAbsentYesterday = yesterdayRecords.reduce((sum, r) => sum + r.absent, 0);
+            const totalClassesYesterday = yesterdayRecords.length;
+            const totalStudentsYesterday = yesterdayRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+            const avgAttendanceYesterday = totalStudentsYesterday > 0 ? 
+                Math.round((totalPresentYesterday / totalStudentsYesterday) * 100) : 0;
+            
+            // Calculate changes
+            const presentChange = totalPresentYesterday > 0 ? 
+                Math.round(((totalPresentToday - totalPresentYesterday) / totalPresentYesterday) * 100) : 100;
+            const absentChange = totalAbsentYesterday > 0 ? 
+                Math.round(((totalAbsentToday - totalAbsentYesterday) / totalAbsentYesterday) * 100) : -100;
+            const classesChange = totalClassesYesterday > 0 ? 
+                Math.round(((totalClassesToday - totalClassesYesterday) / totalClassesYesterday) * 100) : 100;
+            const attendanceChange = avgAttendanceYesterday > 0 ? 
+                Math.round(((avgAttendanceToday - avgAttendanceYesterday) / avgAttendanceYesterday) * 100) : 100;
+            
+            // Update DOM elements
+            totalPresentEl.textContent = totalPresentToday.toLocaleString();
+            totalAbsentEl.textContent = totalAbsentToday.toLocaleString();
+            totalClassesEl.textContent = totalClassesToday;
+            avgAttendanceEl.textContent = `${avgAttendanceToday}%`;
+            
+            presentChangeEl.textContent = `${Math.abs(presentChange)}%`;
+            presentChangeEl.parentElement.className = `stat-change ${presentChange >= 0 ? 'positive' : 'negative'}`;
+            presentChangeEl.parentElement.querySelector('i').className = 
+                `fas fa-arrow-${presentChange >= 0 ? 'up' : 'down'}`;
+            
+            absentChangeEl.textContent = `${Math.abs(absentChange)}%`;
+            absentChangeEl.parentElement.className = `stat-change ${absentChange <= 0 ? 'positive' : 'negative'}`;
+            absentChangeEl.parentElement.querySelector('i').className = 
+                `fas fa-arrow-${absentChange <= 0 ? 'down' : 'up'}`;
+            
+            classesChangeEl.textContent = `${Math.abs(classesChange)}%`;
+            classesChangeEl.parentElement.className = `stat-change ${classesChange >= 0 ? 'positive' : 'negative'}`;
+            
+            attendanceChangeEl.textContent = `${Math.abs(attendanceChange)}%`;
+            attendanceChangeEl.parentElement.className = `stat-change ${attendanceChange >= 0 ? 'positive' : 'negative'}`;
+        }
+
+        // Update subject analysis table
+        function updateSubjectAnalysisTable() {
+            const today = new Date().toISOString().split('T')[0];
+            const tableBody = document.getElementById('subjectTableBody');
+            tableBody.innerHTML = '';
+            
+            attendanceData.subjects.forEach(subject => {
+                // Get all records for this subject
+                const subjectRecords = attendanceData.records.filter(r => r.subject === subject);
+                
+                // Get today's records
+                const todayRecords = subjectRecords.filter(r => r.date === today);
+                
+                // Calculate statistics
+                const classesHeld = subjectRecords.length;
+                const totalPresent = subjectRecords.reduce((sum, r) => sum + r.present, 0);
+                const totalAbsent = subjectRecords.reduce((sum, r) => sum + r.absent, 0);
+                const totalStudents = subjectRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+                const attendanceRate = totalStudents > 0 ? 
+                    Math.round((totalPresent / totalStudents) * 100) : 0;
+                
+                // Determine trend (compared to yesterday)
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                const yesterdayRecords = subjectRecords.filter(r => r.date === yesterdayStr);
+                const yesterdayPresent = yesterdayRecords.reduce((sum, r) => sum + r.present, 0);
+                const yesterdayStudents = yesterdayRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+                const yesterdayRate = yesterdayStudents > 0 ? 
+                    Math.round((yesterdayPresent / yesterdayStudents) * 100) : 0;
+                
+                const trend = attendanceRate - yesterdayRate;
+                let trendIcon = 'minus';
+                let trendColor = 'gray';
+                
+                if (trend > 5) {
+                    trendIcon = 'arrow-up';
+                    trendColor = '#10b981';
+                } else if (trend < -5) {
+                    trendIcon = 'arrow-down';
+                    trendColor = '#ef4444';
+                }
+                
+                // Determine attendance level for progress bar
+                let attendanceClass = 'low-attendance';
+                if (attendanceRate >= 80) attendanceClass = 'high-attendance';
+                else if (attendanceRate >= 60) attendanceClass = 'medium-attendance';
+                
+                // Create table row
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${subject}</strong></td>
+                    <td>${classesHeld}</td>
+                    <td>${totalPresent}</td>
+                    <td>${totalAbsent}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span>${attendanceRate}%</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill ${attendanceClass}" style="width: ${attendanceRate}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: ${trendColor}">
+                        <i class="fas fa-${trendIcon}"></i>
+                        ${Math.abs(trend)}%
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update all dashboard data
+        function updateDashboardData() {
+            // Simulate new data (in real app, this would come from API)
+            generateSampleData();
+            
+            // Update current date
+            updateCurrentDate();
+            
+            // Update statistics
+            updateDashboardStats();
+            
+            // Update charts with new data
+            updateAllCharts();
+            
+            // Update table
+            updateSubjectAnalysisTable();
+            
+            // Show update notification
+            showNotification('Dashboard data updated successfully!', 'success');
+        }
+
+        // Update all charts with current data
+        function updateAllCharts() {
+            // Get current filter states
+            const dayFilter = document.querySelector('.chart-controls .time-filter.active[data-period]');
+            const attendanceFilter = document.querySelector('.chart-controls .time-filter.active[data-view]');
+            const classesFilter = document.querySelector('.chart-controls .time-filter.active[data-range]');
+            const distributionFilter = document.querySelector('.chart-controls .time-filter.active[data-type]');
+            
+            // Update each chart
+            if (dayVsPresentChart) {
+                const daysCount = dayFilter ? parseInt(dayFilter.getAttribute('data-period')) : 7;
+                dayVsPresentChart.data = getDayVsPresentData(daysCount);
+                dayVsPresentChart.update();
+            }
+            
+            if (subjectVsAttendanceChart) {
+                const viewType = attendanceFilter ? attendanceFilter.getAttribute('data-view') : 'present';
+                subjectVsAttendanceChart.data = getSubjectVsAttendanceData(viewType);
+                subjectVsAttendanceChart.update();
+            }
+            
+            if (subjectVsClassesChart) {
+                const timeRange = classesFilter ? classesFilter.getAttribute('data-range') : 'week';
+                subjectVsClassesChart.data = getSubjectVsClassesData(timeRange);
+                subjectVsClassesChart.update();
+            }
+            
+            if (attendanceDistributionChart) {
+                const distributionType = distributionFilter ? distributionFilter.getAttribute('data-type') : 'subject';
+                attendanceDistributionChart.data = getAttendanceDistributionData(distributionType);
+                attendanceDistributionChart.update();
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+            
+            // Add CSS for animations
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Time filter buttons
+            document.querySelectorAll('.time-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from siblings
+                    this.parentElement.querySelectorAll('.time-filter').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update the corresponding chart
+                    updateAllCharts();
+                });
+            });
+            
+            // Refresh data button
+            refreshDataBtn.addEventListener('click', updateDashboardData);
+            
+            // Export data button
+            exportDataBtn.addEventListener('click', function() {
+                // Create CSV data
+                let csvContent = "Subject,Classes Held,Total Present,Total Absent,Attendance Rate\n";
+                
+                attendanceData.subjects.forEach(subject => {
+                    const subjectRecords = attendanceData.records.filter(r => r.subject === subject);
+                    const classesHeld = subjectRecords.length;
+                    const totalPresent = subjectRecords.reduce((sum, r) => sum + r.present, 0);
+                    const totalAbsent = subjectRecords.reduce((sum, r) => sum + r.absent, 0);
+                    const totalStudents = subjectRecords.reduce((sum, r) => sum + r.totalStudents, 0);
+                    const attendanceRate = totalStudents > 0 ? 
+                        Math.round((totalPresent / totalStudents) * 100) : 0;
+                    
+                    csvContent += `${subject},${classesHeld},${totalPresent},${totalAbsent},${attendanceRate}%\n`;
+                });
+                
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `attendance_report_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showNotification('Report exported successfully!', 'success');
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+R to refresh
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    updateDashboardData();
+                }
+                
+                // Ctrl+E to export
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    exportDataBtn.click();
+                }
+            });
+        }
+
+        // Initialize the dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

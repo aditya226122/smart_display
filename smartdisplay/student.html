@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Information Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --accent-blue: #4361ee;
+            --accent-green: #4cc9f0;
+            --accent-red: #f72585;
+            --accent-orange: #f8961e;
+            --accent-purple: #7209b7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fb 0%, #e9ecef 100%);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            color: var(--success);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--success), var(--accent-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 90px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 0;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--light-gray);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title p {
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2ab4d6;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e11570;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e68905;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 5px solid;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.achievements {
+            border-color: var(--accent-green);
+        }
+
+        .card.rules {
+            border-color: var(--accent-orange);
+        }
+
+        .card.instructions {
+            border-color: var(--accent-blue);
+        }
+
+        .card.notifications {
+            border-color: var(--accent-purple);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .achievements .card-icon {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--accent-green);
+        }
+
+        .rules .card-icon {
+            background: rgba(248, 150, 30, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .instructions .card-icon {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .notifications .card-icon {
+            background: rgba(114, 9, 183, 0.2);
+            color: var(--accent-purple);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card-details {
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        /* Items List */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .item-card {
+            background: var(--light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-card.achievement {
+            border-left-color: var(--accent-green);
+        }
+
+        .item-card.rule {
+            border-left-color: var(--accent-orange);
+        }
+
+        .item-card.instruction {
+            border-left-color: var(--accent-blue);
+        }
+
+        .item-card.notification {
+            border-left-color: var(--accent-purple);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .item-date {
+            font-size: 0.85rem;
+            color: var(--gray);
+            background: rgba(108, 117, 125, 0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .item-content {
+            color: var(--gray);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag.academic {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .tag.sports {
+            background: rgba(76, 201, 240, 0.1);
+            color: var(--accent-green);
+        }
+
+        .tag.cultural {
+            background: rgba(248, 150, 30, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .tag.important {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--accent-red);
+        }
+
+        .tag.upcoming {
+            background: rgba(114, 9, 183, 0.1);
+            color: var(--accent-purple);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--danger);
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: color 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close-btn:hover {
+            background: var(--light-gray);
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(76, 201, 240, 0.2);
+            color: var(--accent-green);
+        }
+
+        .status-expired {
+            background: rgba(247, 37, 133, 0.2);
+            color: var(--accent-red);
+        }
+
+        .status-upcoming {
+            background: rgba(248, 150, 30, 0.2);
+            color: var(--accent-orange);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--light-gray);
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--light-gray);
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 1rem;
+            }
+            
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 0;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 1rem;
+            }
+            
+            .nav-item {
+                white-space: nowrap;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .item-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .item-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .item-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Student Information System</h1>
+                <p>Manage Achievements, Rules, Instructions & Notifications</p>
+            </div>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <div style="font-weight: 600;">Admin User</div>
+                <div style="font-size: 0.85rem; opacity: 0.9;">Administrator</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" data-section="achievements">
+                    <i class="fas fa-trophy nav-icon"></i>
+                    <span>Achievements</span>
+                </li>
+                <li class="nav-item" data-section="rules">
+                    <i class="fas fa-gavel nav-icon"></i>
+                    <span>Rules & Regulations</span>
+                </li>
+                <li class="nav-item" data-section="instructions">
+                    <i class="fas fa-info-circle nav-icon"></i>
+                    <span>Student Instructions</span>
+                </li>
+                <li class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell nav-icon"></i>
+                    <span>Exam Notifications</span>
+                </li>
+                <li class="nav-item" data-section="results">
+                    <i class="fas fa-chart-line nav-icon"></i>
+                    <span>Result Notifications</span>
+                </li>
+                <li class="nav-item" data-section="settings">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span>Settings</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+                        <p>Manage all student information and communications</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success" id="addAchievementBtn">
+                            <i class="fas fa-plus"></i> Add Achievement
+                        </button>
+                        <button class="btn btn-primary" id="addNotificationBtn">
+                            <i class="fas fa-bell"></i> Add Notification
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <div class="dashboard-cards">
+                    <div class="card achievements">
+                        <div class="card-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="card-title">Total Achievements</div>
+                        <div class="card-value" id="achievementsCount">12</div>
+                        <div class="card-details">
+                            <i class="fas fa-calendar"></i>
+                            <span>Last added: 2 days ago</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card rules">
+                        <div class="card-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <div class="card-title">Active Rules</div>
+                        <div class="card-value" id="rulesCount">8</div>
+                        <div class="card-details">
+                            <i class="fas fa-eye"></i>
+                            <span>All students must follow</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card instructions">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="card-title">Instructions</div>
+                        <div class="card-value" id="instructionsCount">15</div>
+                        <div class="card-details">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Important guidelines</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card notifications">
+                        <div class="card-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="card-title">Active Notifications</div>
+                        <div class="card-value" id="notificationsCount">6</div>
+                        <div class="card-details">
+                            <i class="fas fa-clock"></i>
+                            <span>2 upcoming exams</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h3 class="section-title"><i class="fas fa-history"></i> Recent Activity</h3>
+                        <button class="btn btn-outline" id="refreshActivity">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="items-list" id="recentActivityList">
+                        <!-- Activity items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Section -->
+            <div id="achievements-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-trophy"></i> Student Achievements</h2>
+                        <p>Manage and showcase student accomplishments</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="addNewAchievement">
+                            <i class="fas fa-plus"></i> Add New Achievement
+                        </button>
+                    </div>
+                </div>
+                <div class="items-list" id="achievementsList">
+                    <!-- Achievements will be populated here -->
+                </div>
+            </div>
+
+            <!-- Rules Section -->
+            <div id="rules-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-gavel"></i> Rules & Regulations</h2>
+                        <p>Define and manage institutional rules</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="addNewRule">
+                            <i class="fas fa-plus"></i> Add New Rule
+                        </button>
+                    </div>
+                </div>
+                <div class="items-list" id="rulesList">
+                    <!-- Rules will be populated here -->
+                </div>
+            </div>
+
+            <!-- Instructions Section -->
+            <div id="instructions-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-info-circle"></i> Student Instructions</h2>
+                        <p>Guidelines and instructions for students</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="addNewInstruction">
+                            <i class="fas fa-plus"></i> Add New Instruction
+                        </button>
+                    </div>
+                </div>
+                <div class="items-list" id="instructionsList">
+                    <!-- Instructions will be populated here -->
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="notifications-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-bell"></i> Exam Notifications</h2>
+                        <p>Manage exam schedules and announcements</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="addNewNotification">
+                            <i class="fas fa-plus"></i> Add New Notification
+                        </button>
+                    </div>
+                </div>
+                <div class="items-list" id="notificationsList">
+                    <!-- Notifications will be populated here -->
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-chart-line"></i> Result Notifications</h2>
+                        <p>Publish and manage exam results</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" id="addNewResult">
+                            <i class="fas fa-plus"></i> Add Result Notice
+                        </button>
+                    </div>
+                </div>
+                <div class="items-list" id="resultsList">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="content-section" style="display: none;">
+                <div class="content-header">
+                    <div class="page-title">
+                        <h2><i class="fas fa-cog"></i> System Settings</h2>
+                        <p>Configure system preferences and options</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Notification Duration (Days)</label>
+                    <input type="number" class="form-control" id="notificationDuration" value="7" min="1" max="30">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Auto-expire Notifications</label>
+                    <select class="form-control" id="autoExpire">
+                        <option value="yes">Yes, automatically expire after duration</option>
+                        <option value="no">No, keep until manually removed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Academic Year</label>
+                    <input type="text" class="form-control" id="academicYear" value="2023-2024">
+                </div>
+                <button class="btn btn-success" id="saveSettings">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>Student Information Management System &copy; 2023 | Last updated: <span id="currentTime">Loading...</span></p>
+                <p><i class="fas fa-shield-alt"></i> All data is securely stored and managed</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="itemModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">
+                    <i class="fas fa-edit"></i> Add New Item
+                </h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <div class="form-group">
+                        <label class="form-label" for="itemType">Item Type *</label>
+                        <select class="form-control" id="itemType" required>
+                            <option value="">Select Type</option>
+                            <option value="achievement">Achievement</option>
+                            <option value="rule">Rule & Regulation</option>
+                            <option value="instruction">Student Instruction</option>
+                            <option value="notification">Exam Notification</option>
+                            <option value="result">Result Notification</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="itemTitle">Title *</label>
+                        <input type="text" class="form-control" id="itemTitle" required placeholder="Enter title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="itemDescription">Description *</label>
+                        <textarea class="form-control" id="itemDescription" required placeholder="Enter detailed description"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="itemDate">Date *</label>
+                            <input type="date" class="form-control" id="itemDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="itemExpiry">Expiry Date (Optional)</label>
+                            <input type="date" class="form-control" id="itemExpiry">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="itemTags">Tags</label>
+                        <select class="form-control" id="itemTags" multiple>
+                            <option value="academic">Academic</option>
+                            <option value="sports">Sports</option>
+                            <option value="cultural">Cultural</option>
+                            <option value="important">Important</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="mid-exam">Mid Exam</option>
+                            <option value="semester-exam">Semester Exam</option>
+                            <option value="result">Result</option>
+                        </select>
+                        <small style="color: var(--gray); display: block; margin-top: 5px;">Hold Ctrl/Cmd to select multiple tags</small>
+                    </div>
+                    
+                    <div class="form-group" id="studentNameGroup">
+                        <label class="form-label" for="studentName">Student/Class Name</label>
+                        <input type="text" class="form-control" id="studentName" placeholder="e.g., John Doe or Class 10-A">
+                    </div>
+                    
+                    <div class="form-group" id="examTypeGroup">
+                        <label class="form-label" for="examType">Exam Type</label>
+                        <select class="form-control" id="examType">
+                            <option value="">Select Exam Type</option>
+                            <option value="mid-term">Mid Term Exam</option>
+                            <option value="semester">Semester Exam</option>
+                            <option value="final">Final Exam</option>
+                            <option value="practical">Practical Exam</option>
+                            <option value="internal">Internal Assessment</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" id="itemId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteItemBtn" style="display: none;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+                <button class="btn" id="cancelBtn">Cancel</button>
+                <button class="btn btn-success" id="saveItemBtn">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let data = {
+            achievements: [],
+            rules: [],
+            instructions: [],
+            notifications: [],
+            results: [],
+            settings: {
+                notificationDuration: 7,
+                autoExpire: 'yes',
+                academicYear: '2023-2024'
+            }
+        };
+
+        // DOM Elements
+        const sections = {
+            dashboard: document.getElementById('dashboard-section'),
+            achievements: document.getElementById('achievements-section'),
+            rules: document.getElementById('rules-section'),
+            instructions: document.getElementById('instructions-section'),
+            notifications: document.getElementById('notifications-section'),
+            results: document.getElementById('results-section'),
+            settings: document.getElementById('settings-section')
+        };
+
+        const navItems = document.querySelectorAll('.nav-item');
+        const itemModal = document.getElementById('itemModal');
+        const itemForm = document.getElementById('itemForm');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveItemBtn = document.getElementById('saveItemBtn');
+        const deleteItemBtn = document.getElementById('deleteItemBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        
+        // Form elements
+        const itemTypeSelect = document.getElementById('itemType');
+        const itemTitle = document.getElementById('itemTitle');
+        const itemDescription = document.getElementById('itemDescription');
+        const itemDate = document.getElementById('itemDate');
+        const itemExpiry = document.getElementById('itemExpiry');
+        const itemTags = document.getElementById('itemTags');
+        const studentName = document.getElementById('studentName');
+        const studentNameGroup = document.getElementById('studentNameGroup');
+        const examType = document.getElementById('examType');
+        const examTypeGroup = document.getElementById('examTypeGroup');
+        const itemId = document.getElementById('itemId');
+
+        // Stats elements
+        const achievementsCount = document.getElementById('achievementsCount');
+        const rulesCount = document.getElementById('rulesCount');
+        const instructionsCount = document.getElementById('instructionsCount');
+        const notificationsCount = document.getElementById('notificationsCount');
+
+        // List containers
+        const achievementsList = document.getElementById('achievementsList');
+        const rulesList = document.getElementById('rulesList');
+        const instructionsList = document.getElementById('instructionsList');
+        const notificationsList = document.getElementById('notificationsList');
+        const resultsList = document.getElementById('resultsList');
+        const recentActivityList = document.getElementById('recentActivityList');
+
+        // Buttons
+        const addNewAchievement = document.getElementById('addNewAchievement');
+        const addNewRule = document.getElementById('addNewRule');
+        const addNewInstruction = document.getElementById('addNewInstruction');
+        const addNewNotification = document.getElementById('addNewNotification');
+        const addNewResult = document.getElementById('addNewResult');
+        const addAchievementBtn = document.getElementById('addAchievementBtn');
+        const addNotificationBtn = document.getElementById('addNotificationBtn');
+        const refreshActivity = document.getElementById('refreshActivity');
+        const saveSettings = document.getElementById('saveSettings');
+
+        // Settings elements
+        const notificationDuration = document.getElementById('notificationDuration');
+        const autoExpire = document.getElementById('autoExpire');
+        const academicYear = document.getElementById('academicYear');
+
+        let currentSection = 'dashboard';
+        let isEditMode = false;
+        let currentEditItem = null;
+
+        // Initialize the dashboard
+        function initDashboard() {
+            // Load data from localStorage
+            loadData();
+            
+            // Set current date
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000); // Update every minute
+            
+            // Set today's date as default in form
+            const today = new Date().toISOString().split('T')[0];
+            itemDate.value = today;
+            
+            // Set expiry date (7 days from now by default)
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 7);
+            itemExpiry.value = expiryDate.toISOString().split('T')[0];
+            
+            // Load settings
+            loadSettings();
+            
+            // Render all sections
+            renderAllSections();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Show welcome notification
+            showNotification('Dashboard loaded successfully!', 'success');
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('studentInfoData');
+            if (saved) {
+                data = JSON.parse(saved);
+            } else {
+                // Initialize with sample data
+                initializeSampleData();
+                saveData();
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('studentInfoData', JSON.stringify(data));
+        }
+
+        // Load settings
+        function loadSettings() {
+            notificationDuration.value = data.settings.notificationDuration;
+            autoExpire.value = data.settings.autoExpire;
+            academicYear.value = data.settings.academicYear;
+        }
+
+        // Initialize sample data
+        function initializeSampleData() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const lastWeek = new Date(today);
+            lastWeek.setDate(lastWeek.getDate() - 7);
+
+            data.achievements = [
+                {
+                    id: 1,
+                    type: 'achievement',
+                    title: 'First Place in Science Fair',
+                    description: 'John Smith secured first place in the regional science fair with his project on renewable energy.',
+                    date: yesterday.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['academic', 'important'],
+                    studentName: 'John Smith (Class 12-A)',
+                    status: 'active'
+                },
+                {
+                    id: 2,
+                    type: 'achievement',
+                    title: 'Inter-College Football Champions',
+                    description: 'College football team won the inter-college championship tournament.',
+                    date: lastWeek.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['sports'],
+                    studentName: 'Football Team',
+                    status: 'active'
+                }
+            ];
+
+            data.rules = [
+                {
+                    id: 3,
+                    type: 'rule',
+                    title: 'Dress Code Policy',
+                    description: 'All students must adhere to the prescribed dress code during college hours.',
+                    date: today.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['important'],
+                    status: 'active'
+                },
+                {
+                    id: 4,
+                    type: 'rule',
+                    title: 'Library Rules',
+                    description: 'No food or drinks allowed in the library. Maintain silence at all times.',
+                    date: today.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['academic'],
+                    status: 'active'
+                }
+            ];
+
+            data.instructions = [
+                {
+                    id: 5,
+                    type: 'instruction',
+                    title: 'Lab Safety Instructions',
+                    description: 'Always wear lab coats and safety goggles in chemistry lab. Follow instructor guidance.',
+                    date: today.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['academic', 'important'],
+                    status: 'active'
+                }
+            ];
+
+            data.notifications = [
+                {
+                    id: 6,
+                    type: 'notification',
+                    title: 'Mid-Term Exams Schedule',
+                    description: 'Mid-term exams for all departments will be conducted from Dec 15-22, 2023.',
+                    date: today.toISOString().split('T')[0],
+                    expiry: '2023-12-31',
+                    tags: ['mid-exam', 'upcoming', 'important'],
+                    examType: 'mid-term',
+                    status: 'active'
+                },
+                {
+                    id: 7,
+                    type: 'notification',
+                    title: 'Practical Exam Guidelines',
+                    description: 'All practical exams must be completed by Dec 10. Bring your own lab equipment.',
+                    date: yesterday.toISOString().split('T')[0],
+                    expiry: '2023-12-15',
+                    tags: ['practical', 'upcoming'],
+                    examType: 'practical',
+                    status: 'active'
+                }
+            ];
+
+            data.results = [
+                {
+                    id: 8,
+                    type: 'result',
+                    title: 'Mid-Term Results Published',
+                    description: 'Mid-term exam results are now available on the student portal.',
+                    date: yesterday.toISOString().split('T')[0],
+                    expiry: null,
+                    tags: ['result', 'academic'],
+                    status: 'active'
+                }
+            ];
+        }
+
+        // Update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            document.getElementById('currentTime').textContent = `${dateString} ${timeString}`;
+        }
+
+        // Render all sections
+        function renderAllSections() {
+            renderDashboard();
+            renderAchievements();
+            renderRules();
+            renderInstructions();
+            renderNotifications();
+            renderResults();
+            updateStats();
+        }
+
+        // Render dashboard
+        function renderDashboard() {
+            // Update stats
+            updateStats();
+            
+            // Render recent activity
+            renderRecentActivity();
+        }
+
+        // Render achievements
+        function renderAchievements() {
+            achievementsList.innerHTML = '';
+            
+            if (data.achievements.length === 0) {
+                achievementsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>No Achievements Yet</h3>
+                        <p>Add student achievements to showcase their accomplishments.</p>
+                        <button class="btn btn-primary" onclick="openAddModal('achievement')">
+                            <i class="fas fa-plus"></i> Add First Achievement
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.achievements.forEach(item => {
+                const itemElement = createItemElement(item);
+                achievementsList.appendChild(itemElement);
+            });
+        }
+
+        // Render rules
+        function renderRules() {
+            rulesList.innerHTML = '';
+            
+            if (data.rules.length === 0) {
+                rulesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <h3>No Rules Yet</h3>
+                        <p>Add rules and regulations for students to follow.</p>
+                        <button class="btn btn-primary" onclick="openAddModal('rule')">
+                            <i class="fas fa-plus"></i> Add First Rule
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.rules.forEach(item => {
+                const itemElement = createItemElement(item);
+                rulesList.appendChild(itemElement);
+            });
+        }
+
+        // Render instructions
+        function renderInstructions() {
+            instructionsList.innerHTML = '';
+            
+            if (data.instructions.length === 0) {
+                instructionsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h3>No Instructions Yet</h3>
+                        <p>Add instructions and guidelines for students.</p>
+                        <button class="btn btn-primary" onclick="openAddModal('instruction')">
+                            <i class="fas fa-plus"></i> Add First Instruction
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.instructions.forEach(item => {
+                const itemElement = createItemElement(item);
+                instructionsList.appendChild(itemElement);
+            });
+        }
+
+        // Render notifications
+        function renderNotifications() {
+            notificationsList.innerHTML = '';
+            
+            if (data.notifications.length === 0) {
+                notificationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h3>No Notifications Yet</h3>
+                        <p>Add exam notifications and announcements.</p>
+                        <button class="btn btn-primary" onclick="openAddModal('notification')">
+                            <i class="fas fa-plus"></i> Add First Notification
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.notifications.forEach(item => {
+                const itemElement = createItemElement(item);
+                notificationsList.appendChild(itemElement);
+            });
+        }
+
+        // Render results
+        function renderResults() {
+            resultsList.innerHTML = '';
+            
+            if (data.results.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>No Results Yet</h3>
+                        <p>Add result notifications for students.</p>
+                        <button class="btn btn-primary" onclick="openAddModal('result')">
+                            <i class="fas fa-plus"></i> Add First Result
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            data.results.forEach(item => {
+                const itemElement = createItemElement(item);
+                resultsList.appendChild(itemElement);
+            });
+        }
+
+        // Render recent activity
+        function renderRecentActivity() {
+            recentActivityList.innerHTML = '';
+            
+            // Combine all items and sort by date (newest first)
+            const allItems = [
+                ...data.achievements,
+                ...data.rules,
+                ...data.instructions,
+                ...data.notifications,
+                ...data.results
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            
+            if (allItems.length === 0) {
+                recentActivityList.innerHTML = `
+                    <div class="empty-state" style="padding: 1rem;">
+                        <p>No recent activity</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allItems.forEach(item => {
+                const activityElement = createActivityElement(item);
+                recentActivityList.appendChild(activityElement);
+            });
+        }
+
+        // Create item element
+        function createItemElement(item) {
+            const div = document.createElement('div');
+            div.className = `item-card ${item.type}`;
+            
+            const typeIcons = {
+                achievement: 'trophy',
+                rule: 'gavel',
+                instruction: 'info-circle',
+                notification: 'bell',
+                result: 'chart-line'
+            };
+            
+            const status = getItemStatus(item);
+            const statusClass = `status-${status}`;
+            const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            const tagsHtml = item.tags ? item.tags.map(tag => 
+                `<span class="tag ${tag.includes('-') ? tag.split('-')[0] : tag}">${tag.replace('-', ' ')}</span>`
+            ).join('') : '';
+            
+            const studentInfo = item.studentName ? 
+                `<div style="margin-bottom: 0.5rem;"><strong>Student/Class:</strong> ${item.studentName}</div>` : '';
+            
+            const examInfo = item.examType ? 
+                `<div style="margin-bottom: 0.5rem;"><strong>Exam Type:</strong> ${item.examType.replace('-', ' ')}</div>` : '';
+            
+            div.innerHTML = `
+                <div class="item-header">
+                    <div class="item-title">
+                        <i class="fas fa-${typeIcons[item.type]}"></i> ${item.title}
+                    </div>
+                    <div class="item-date">
+                        ${formatDate(item.date)}
+                        ${item.expiry ? ` - ${formatDate(item.expiry)}` : ''}
+                    </div>
+                </div>
+                ${studentInfo}
+                ${examInfo}
+                <div class="item-content">${item.description}</div>
+                <div class="item-footer">
+                    <div class="item-tags">
+                        ${tagsHtml}
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn edit-btn" onclick="editItem(${item.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteItem(${item.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        // Create activity element
+        function createActivityElement(item) {
+            const div = document.createElement('div');
+            div.className = `item-card ${item.type}`;
+            div.style.padding = '1rem';
+            
+            const typeNames = {
+                achievement: 'Achievement',
+                rule: 'Rule',
+                instruction: 'Instruction',
+                notification: 'Notification',
+                result: 'Result'
+            };
+            
+            const typeColors = {
+                achievement: 'var(--accent-green)',
+                rule: 'var(--accent-orange)',
+                instruction: 'var(--accent-blue)',
+                notification: 'var(--accent-purple)',
+                result: 'var(--info)'
+            };
+            
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <span style="background: ${typeColors[item.type]}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">
+                        ${typeNames[item.type]}
+                    </span>
+                    <span style="font-size: 0.85rem; color: var(--gray);">
+                        ${formatDate(item.date, true)}
+                    </span>
+                </div>
+                <div style="font-weight: 500;">${item.title}</div>
+            `;
+            
+            return div;
+        }
+
+        // Get item status
+        function getItemStatus(item) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (item.expiry && item.expiry < today) {
+                return 'expired';
+            }
+            
+            if (item.date > today) {
+                return 'upcoming';
+            }
+            
+            return 'active';
+        }
+
+        // Update statistics
+        function updateStats() {
+            achievementsCount.textContent = data.achievements.length;
+            rulesCount.textContent = data.rules.length;
+            instructionsCount.textContent = data.instructions.length;
+            notificationsCount.textContent = data.notifications.length;
+        }
+
+        // Format date
+        function formatDate(dateString, relative = false) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (relative) {
+                if (date.toDateString() === today.toDateString()) {
+                    return 'Today';
+                } else if (date.toDateString() === yesterday.toDateString()) {
+                    return 'Yesterday';
+                }
+            }
+            
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Open add modal
+        function openAddModal(type = '') {
+            isEditMode = false;
+            modalTitle.innerHTML = `<i class="fas fa-plus"></i> Add New ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            
+            // Reset form
+            itemForm.reset();
+            itemId.value = '';
+            
+            // Set default values
+            const today = new Date().toISOString().split('T')[0];
+            itemDate.value = today;
+            
+            // Set expiry date (7 days from now)
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 7);
+            itemExpiry.value = expiryDate.toISOString().split('T')[0];
+            
+            // Set item type if provided
+            if (type) {
+                itemTypeSelect.value = type;
+                toggleFormFields(type);
+            }
+            
+            // Hide delete button
+            deleteItemBtn.style.display = 'none';
+            
+            // Show modal
+            itemModal.style.display = 'flex';
+        }
+
+        // Edit item
+        function editItem(id) {
+            const item = getAllItems().find(i => i.id === id);
+            if (!item) return;
+            
+            isEditMode = true;
+            currentEditItem = item;
+            
+            modalTitle.innerHTML = `<i class="fas fa-edit"></i> Edit ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`;
+            
+            // Fill form with item data
+            itemTypeSelect.value = item.type;
+            itemTitle.value = item.title;
+            itemDescription.value = item.description;
+            itemDate.value = item.date;
+            itemExpiry.value = item.expiry || '';
+            itemId.value = item.id;
+            
+            // Set tags
+            if (item.tags && item.tags.length > 0) {
+                Array.from(itemTags.options).forEach(option => {
+                    option.selected = item.tags.includes(option.value);
+                });
+            }
+            
+            // Set additional fields
+            if (item.studentName) {
+                studentName.value = item.studentName;
+            }
+            
+            if (item.examType) {
+                examType.value = item.examType;
+            }
+            
+            // Toggle form fields based on type
+            toggleFormFields(item.type);
+            
+            // Show delete button
+            deleteItemBtn.style.display = 'flex';
+            
+            // Show modal
+            itemModal.style.display = 'flex';
+        }
+
+        // Toggle form fields based on item type
+        function toggleFormFields(type) {
+            if (type === 'achievement' || type === 'result') {
+                studentNameGroup.style.display = 'block';
+                examTypeGroup.style.display = 'none';
+            } else if (type === 'notification') {
+                studentNameGroup.style.display = 'none';
+                examTypeGroup.style.display = 'block';
+            } else {
+                studentNameGroup.style.display = 'none';
+                examTypeGroup.style.display = 'none';
+            }
+        }
+
+        // Save item
+        function saveItem() {
+            // Validate form
+            if (!itemForm.checkValidity()) {
+                itemForm.reportValidity();
+                return;
+            }
+            
+            const itemData = {
+                id: isEditMode ? parseInt(itemId.value) : generateId(),
+                type: itemTypeSelect.value,
+                title: itemTitle.value.trim(),
+                description: itemDescription.value.trim(),
+                date: itemDate.value,
+                expiry: itemExpiry.value || null,
+                tags: Array.from(itemTags.selectedOptions).map(opt => opt.value),
+                status: 'active'
+            };
+            
+            // Add additional fields based on type
+            if (itemTypeSelect.value === 'achievement' || itemTypeSelect.value === 'result') {
+                itemData.studentName = studentName.value.trim();
+            }
+            
+            if (itemTypeSelect.value === 'notification') {
+                itemData.examType = examType.value;
+            }
+            
+            if (isEditMode) {
+                // Update existing item
+                updateItemInArray(itemData);
+                showNotification(`${itemData.type} updated successfully!`, 'success');
+            } else {
+                // Add new item
+                addItemToArray(itemData);
+                showNotification(`${itemData.type} added successfully!`, 'success');
+            }
+            
+            // Save data
+            saveData();
+            
+            // Re-render sections
+            renderAllSections();
+            
+            // Close modal
+            closeModal();
+        }
+
+        // Generate unique ID
+        function generateId() {
+            const allItems = getAllItems();
+            return allItems.length > 0 ? Math.max(...allItems.map(i => i.id)) + 1 : 1;
+        }
+
+        // Get all items
+        function getAllItems() {
+            return [
+                ...data.achievements,
+                ...data.rules,
+                ...data.instructions,
+                ...data.notifications,
+                ...data.results
+            ];
+        }
+
+        // Add item to appropriate array
+        function addItemToArray(item) {
+            switch (item.type) {
+                case 'achievement':
+                    data.achievements.push(item);
+                    break;
+                case 'rule':
+                    data.rules.push(item);
+                    break;
+                case 'instruction':
+                    data.instructions.push(item);
+                    break;
+                case 'notification':
+                    data.notifications.push(item);
+                    break;
+                case 'result':
+                    data.results.push(item);
+                    break;
+            }
+        }
+
+        // Update item in array
+        function updateItemInArray(updatedItem) {
+            const arrays = {
+                achievement: data.achievements,
+                rule: data.rules,
+                instruction: data.instructions,
+                notification: data.notifications,
+                result: data.results
+            };
+            
+            const array = arrays[updatedItem.type];
+            const index = array.findIndex(item => item.id === updatedItem.id);
+            
+            if (index !== -1) {
+                array[index] = updatedItem;
+            }
+        }
+
+        // Delete item
+        function deleteItem(id) {
+            const item = getAllItems().find(i => i.id === id);
+            if (!item) return;
+            
+            if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+                const arrays = {
+                    achievement: data.achievements,
+                    rule: data.rules,
+                    instruction: data.instructions,
+                    notification: data.notifications,
+                    result: data.results
+                };
+                
+                const array = arrays[item.type];
+                const index = array.findIndex(i => i.id === id);
+                
+                if (index !== -1) {
+                    array.splice(index, 1);
+                    saveData();
+                    renderAllSections();
+                    
+                    if (itemModal.style.display === 'flex' && currentEditItem && currentEditItem.id === id) {
+                        closeModal();
+                    }
+                    
+                    showNotification(`${item.type} deleted successfully!`, 'success');
+                }
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            itemModal.style.display = 'none';
+            isEditMode = false;
+            currentEditItem = null;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+            
+            // Add CSS for animations if not already added
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Save settings
+        function saveSettingsHandler() {
+            data.settings = {
+                notificationDuration: parseInt(notificationDuration.value),
+                autoExpire: autoExpire.value,
+                academicYear: academicYear.value.trim()
+            };
+            
+            saveData();
+            showNotification('Settings saved successfully!', 'success');
+        }
+
+        // Switch section
+        function switchSection(section) {
+            // Hide all sections
+            Object.values(sections).forEach(sec => {
+                sec.style.display = 'none';
+            });
+            
+            // Remove active class from all nav items
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            sections[section].style.display = 'block';
+            
+            // Add active class to selected nav item
+            document.querySelector(`.nav-item[data-section="${section}"]`).classList.add('active');
+            
+            currentSection = section;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    switchSection(section);
+                });
+            });
+            
+            // Modal
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            saveItemBtn.addEventListener('click', saveItem);
+            deleteItemBtn.addEventListener('click', () => {
+                if (currentEditItem) {
+                    deleteItem(currentEditItem.id);
+                }
+            });
+            
+            // Close modal when clicking outside
+            itemModal.addEventListener('click', (e) => {
+                if (e.target === itemModal) {
+                    closeModal();
+                }
+            });
+            
+            // Add buttons
+            addNewAchievement.addEventListener('click', () => openAddModal('achievement'));
+            addNewRule.addEventListener('click', () => openAddModal('rule'));
+            addNewInstruction.addEventListener('click', () => openAddModal('instruction'));
+            addNewNotification.addEventListener('click', () => openAddModal('notification'));
+            addNewResult.addEventListener('click', () => openAddModal('result'));
+            addAchievementBtn.addEventListener('click', () => {
+                switchSection('achievements');
+                setTimeout(() => openAddModal('achievement'), 100);
+            });
+            addNotificationBtn.addEventListener('click', () => {
+                switchSection('notifications');
+                setTimeout(() => openAddModal('notification'), 100);
+            });
+            
+            // Other buttons
+            refreshActivity.addEventListener('click', () => {
+                renderRecentActivity();
+                showNotification('Activity refreshed!', 'success');
+            });
+            
+            saveSettings.addEventListener('click', saveSettingsHandler);
+            
+            // Item type change
+            itemTypeSelect.addEventListener('change', function() {
+                toggleFormFields(this.value);
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Escape to close modal
+                if (e.key === 'Escape' && itemModal.style.display === 'flex') {
+                    closeModal();
+                }
+                
+                // Ctrl+S to save in modal
+                if ((e.ctrlKey || e.metaKey) && e.key === 's' && itemModal.style.display === 'flex') {
+                    e.preventDefault();
+                    saveItem();
+                }
+                
+                // Ctrl+N to add new based on current section
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n' && itemModal.style.display !== 'flex') {
+                    e.preventDefault();
+                    if (currentSection !== 'dashboard' && currentSection !== 'settings') {
+                        openAddModal(currentSection.slice(0, -1)); // Remove 's' from plural
+                    }
+                }
+            });
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
